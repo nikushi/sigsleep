@@ -2,16 +2,43 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
+const usage = `USAGE: sigproxy [options] -- <command> [arguments ...]
+
+sigproxy - wrapper command to proxy signals to command process and inject sleep around command execution.
+
+Options:
+	-after=n     Sleep n seconds after the command exits.
+`
+
+func printUsage() {
+	fmt.Fprintf(os.Stderr, usage)
+}
+
 func main() {
-	if len(os.Args) == 1 {
-		log.Fatal("USAGE: sigproxy <command> [arguments ...]")
+	var optAfter int
+
+	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	flags.Usage = func() { printUsage() }
+	flags.IntVar(&optAfter, "after", 0, "Sleep n seconds after command exit")
+	if err := flags.Parse(os.Args[1:]); err != nil {
+		flags.Usage()
+		os.Exit(1)
+	}
+
+	args := flags.Args()
+	if len(args) == 0 {
+		flags.Usage()
+		os.Exit(1)
 	}
 
 	// Install signal handler as soon as possible - channel is buffered so
@@ -19,7 +46,7 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM)
 
-	cmd := exec.Command(os.Args[1], os.Args[2:]...)
+	cmd := exec.Command(args[0], args[1:]...)
 
 	// These default to /dev/null, so set them explicitly to ours
 	cmd.Stdin = os.Stdin
@@ -47,5 +74,9 @@ func main() {
 		}
 		os.Exit(1)
 	}
+
+	// sleep n after finished the command execution
+	time.Sleep(time.Duration(optAfter) * time.Second)
+
 	os.Exit(0)
 }
