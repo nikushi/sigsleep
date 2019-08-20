@@ -1,4 +1,4 @@
-// https://github.com/weaveworks/weave/blob/master/prog/sigproxy/main.go
+// https://github.com/weaveworks/weave/blob/master/prog/sigsleep/main.go
 package main
 
 import (
@@ -12,9 +12,9 @@ import (
 	"time"
 )
 
-const usage = `USAGE: sigproxy [options] -- <command> [arguments ...]
+const usage = `USAGE: sigsleep [options] -- <command> [arguments ...]
 
-sigproxy - wrapper command to proxy signals to command process and inject sleep around command execution.
+sigsleep - wrapper command to proxy signals to command process and inject sleep around command execution.
 
 Options:
 	-after=n     Sleep n seconds after the command exits.
