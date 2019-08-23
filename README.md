@@ -8,4 +8,7 @@ sigsleep - wrapper command to proxy signals to command process and inject sleep
 
 Options:
     -after=n     Sleep n seconds after the command exits.
+
+Environment Variables:
+    SIGSLEEP_AFTER_SECONDS=n    Same as -after.
 ```

@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 )
@@ -24,12 +25,21 @@ func printUsage() {
 	fmt.Fprintf(os.Stderr, usage)
 }
 
+func lookupEnvInt(key string, defaultVal int) int {
+	v, ok := os.LookupEnv(key)
+	if !ok {
+		v = "0"
+	}
+	ret, _ := strconv.Atoi(v)
+	return ret
+}
+
 func main() {
 	var optAfter int
 
 	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	flags.Usage = func() { printUsage() }
-	flags.IntVar(&optAfter, "after", 0, "Sleep n seconds after command exit")
+	flags.IntVar(&optAfter, "after", lookupEnvInt("SIGSLEEP_AFTER_SECONDS", 0), "Sleep n seconds after command exit")
 	if err := flags.Parse(os.Args[1:]); err != nil {
 		flags.Usage()
 		os.Exit(1)
